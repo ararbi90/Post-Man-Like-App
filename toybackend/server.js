@@ -15,6 +15,21 @@ app.get("/val", (req, res) => {
     return res.json(req.query);
 })
 
+app.post("/val", (req, res) => {
+    console.log(req.body)
+    return res.json(req.body);
+})
+
+app.delete("/val", (req, res) => {
+    console.log(req.body)
+    return res.json(req.body);
+})
+
+app.put("/val", (req, res) => {
+    console.log(req.body)
+    return res.json(req.body);
+})
+
 app.listen(port, () => {
     console.log(`Server is running on port: ` + port);
 });

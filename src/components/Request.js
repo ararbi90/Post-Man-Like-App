@@ -8,6 +8,7 @@ import "../index.css";
 import 'react-toastify/dist/ReactToastify.css';
 
 const notify = () => toast.info("Cannot Add on GET request");
+const errorToast = () => toast.error("Request could not be made");
 
 export default class Request extends Component {
     constructor(props) {
@@ -15,8 +16,8 @@ export default class Request extends Component {
 
         this.state = {
             payload: [],
-            method:"GET",
-            address:""
+            method: "GET",
+            address: ""
         }
         this.createRequestParam = this.createRequestParam.bind(this);
         this.updateRequestId = this.updateRequestId.bind(this);
@@ -38,10 +39,8 @@ export default class Request extends Component {
      */
     updateRequestId = (key, update) => {
         let pay = [...this.state.payload];
-        for(let i = 0; i < pay.length; i++)
-        {
-            if(pay[i].keyId === key)
-            {
+        for (let i = 0; i < pay.length; i++) {
+            if (pay[i].keyId === key) {
                 pay[i].id = update;
                 break;
             }
@@ -57,10 +56,8 @@ export default class Request extends Component {
      */
     updateRequestVal = (key, update) => {
         let pay = [...this.state.payload];
-        for(let i = 0; i < pay.length; i++)
-        {
-            if(pay[i].keyId === key)
-            {
+        for (let i = 0; i < pay.length; i++) {
+            if (pay[i].keyId === key) {
                 pay[i].val = update;
                 break;
             }
@@ -76,10 +73,8 @@ export default class Request extends Component {
      */
     deleteRequestParam = (key) => {
         let pay = [...this.state.payload];
-        for(let i = 0; i < pay.length; i++)
-        {
-            if(pay[i].keyId === key)
-            {
+        for (let i = 0; i < pay.length; i++) {
+            if (pay[i].keyId === key) {
                 pay[i].hidden = true;
                 break;
             }
@@ -95,8 +90,7 @@ export default class Request extends Component {
      */
     addNewParam(event) {
         event.preventDefault();
-        if(this.state.method === "GET")
-        {
+        if (this.state.method === "GET") {
             notify()
             return;
         }
@@ -125,13 +119,12 @@ export default class Request extends Component {
      * Create new component based on param
      * @param {*} param to be rendered
      */
-    createRequestComp(param)
-    {
+    createRequestComp(param) {
         return <RequestParam
             id={param.id}
             keyId={param.keyId}
             val={param.val}
-            hidden={param.hidden} 
+            hidden={param.hidden}
             updateRequestId={this.updateRequestId}
             updateRequestVal={this.updateRequestVal}
             deleteRequestParam={this.deleteRequestParam} />
@@ -141,16 +134,14 @@ export default class Request extends Component {
      * Handel submit
      * @param {*} event 
      */
-    handelSubmit(event)
-    {
+    handelSubmit(event) {
         event.preventDefault();
         let payload = [...this.state.payload];
         let arr = payload.filter(val => !val.hidden);
         let data = {}
-        arr.forEach(val => data[val.id]= val.val);
+        arr.forEach(val => data[val.id] = val.val);
 
-        switch(this.state.method)
-        {
+        switch (this.state.method) {
             case "GET":
                 this.handelGet(data);
                 break;
@@ -164,98 +155,96 @@ export default class Request extends Component {
                 this.handelUpdate(data);
                 break;
         }
-        console.log(data)
     }
 
     /**
      * Update method type
      * @param {*} event 
      */
-    updateMethod(event)
-    {
-        if(event.target.value === "GET")
-        {
+    updateMethod(event) {
+        if (event.target.value === "GET") {
             let pay = [...this.state.payload];
-            for(let i = 0; i < pay.length; i++) pay[i].hidden = true;
+            for (let i = 0; i < pay.length; i++) pay[i].hidden = true;
             this.setState({
                 method: event.target.value,
                 payload: pay
             })
         }
-        else
-        {
+        else {
             this.setState({
                 method: event.target.value
             })
         }
     }
 
-    updateAddress(event)
-    {
+    updateAddress(event) {
         this.setState({
             address: event.target.value
         })
     }
 
-    handelGet()
-    {
+    handelGet() {
         axios.get(this.state.address)
-        .then(res => {
-            console.log(res.data);
-        })
+            .then(res => {
+                this.props.sendResponse(res.data)
+            })
+            .catch(err => errorToast())
     }
 
-    handelPost(data)
-    {
-        axios.get(this.state.address, data)
-        .then(res => {
-            console.log(res.data);
-        })
+    handelPost(data) {
+        console.log(data);
+        axios.post(this.state.address, data)
+            .then(res => {
+                this.props.sendResponse(res.data)
+            })
+            .catch(err => errorToast())
     }
 
-    handelDelete(data)
-    {
-        axios.delete(this.state.address, data)
-        .then(res => {
-            console.log(res.data);
-        })
-    }
+    handelDelete(data) {
 
-    handelUpdate(data)
-    {
-        axios.update(this.state.address, data)
-        .then(res => {
-            console.log(res.data);
-        })
-    }
+        axios.delete(this.state.address, {data:data})
+                .then(res => {
+                    this.props.sendResponse(res.data)
+                })
+                .catch(err => errorToast())
+        }
 
-    render() {
-        let arr = [];
-        this.state.payload.forEach(value => arr.push(this.createRequestComp(value)))
-        return (
-            <div className="comp border">
-                <h1>Resquests</h1>
-                <form>
-                    <div className="row mb-3" style={{ margin: "0 auto", width: "90%" }}>
-                        <div className="col" style={{width:"30%"}}>
-                            <select class="custom-select mb-3" onChange={this.updateMethod}>
-                                <option selected value="GET">GET</option>
-                                <option value="POST">POST</option>
-                                <option value="UPDATE">UPDATE</option>
-                                <option value="DELETE">DELETE</option>
-                            </select>
+        handelUpdate(data)
+        {
+            axios.put(this.state.address, data)
+                .then(res => {
+                    this.props.sendResponse(res.data)
+                })
+                .catch(err => errorToast())
+        }
+
+        render() {
+            let arr = [];
+            this.state.payload.forEach(value => arr.push(this.createRequestComp(value)))
+            return (
+                <div className="comp border">
+                    <h1>Resquests</h1>
+                    <form>
+                        <div className="row mb-3" style={{ margin: "0 auto", width: "90%" }}>
+                            <div className="col" style={{ width: "30%" }}>
+                                <select class="custom-select mb-3" onChange={this.updateMethod}>
+                                    <option selected value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="UPDATE">UPDATE</option>
+                                    <option value="DELETE">DELETE</option>
+                                </select>
+                            </div>
+
+                            <div className="col-9">
+                                <input type="text" className="form-control" id="" aria-describedby="key" placeholder="https://google.com" onChange={this.updateAddress} value={this.state.address} />
+                            </div>
                         </div>
-
-                        <div className="col-9">
-                            <input type="text" className="form-control" id="" aria-describedby="key" placeholder="https://google.com" onChange={this.updateAddress} value={this.state.address}/>
-                        </div>
-                    </div>
-                    {arr}
-                    <button type="submit" className="btn btn-primary mr-2" onClick={this.handelSubmit}>Submit</button>
-                </form>
-                <ToastContainer />
-
-            </div>
-        )
+                        {arr}
+                        <button type="submit" className="btn btn-primary mr-2" onClick={this.handelSubmit}>Submit</button>
+                        <button className="btn btn-primary mr-2" onClick={this.addNewParam}>Add</button>
+                    </form>
+                    <ToastContainer />
+                </div>
+            )
+        }
     }
-}

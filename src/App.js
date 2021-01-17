@@ -10,12 +10,16 @@ import "./index.css";
 class App extends React.Component {
   constructor(props) {
     super(props);
-    let requestParams = new Map();
-    this.state = { message: 786 };
+    this.state = {
+      data: {}
+    };
+    this.sendResponse = this.sendResponse.bind(this);
   }
   
   sendResponse = (data) =>{
-
+    this.setState({
+      data:data
+    })
   }
 
   render() {
@@ -32,8 +36,8 @@ class App extends React.Component {
         dragInterval={1}
         direction="horizontal"
         cursor="col-resize">
-          <Request />
-          <Response />
+          <Request sendResponse={this.sendResponse}/>
+          <Response data={this.state.data}/>
         </Split>
 
       </div>
