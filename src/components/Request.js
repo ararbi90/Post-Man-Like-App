@@ -8,6 +8,7 @@ import "../index.css";
 import 'react-toastify/dist/ReactToastify.css';
 
 const notify = () => toast.info("Cannot Add on GET request");
+const conentType = () => toast.info("Please Select a Content-Type");
 const errorToast = () => toast.error("Request could not be made");
 
 export default class Request extends Component {
@@ -17,7 +18,8 @@ export default class Request extends Component {
         this.state = {
             payload: [],
             method: "GET",
-            address: ""
+            address: "",
+            contentType: "Content-Type"
         }
         this.createRequestParam = this.createRequestParam.bind(this);
         this.updateRequestId = this.updateRequestId.bind(this);
@@ -31,6 +33,7 @@ export default class Request extends Component {
         this.handelDelete = this.handelDelete.bind(this);
         this.handelUpdate = this.handelUpdate.bind(this);
         this.updateAddress = this.updateAddress.bind(this);
+        this.updateContentType = this.updateContentType.bind(this);
     }
     /**
      * Pass to child RequestParam to update id
@@ -167,7 +170,8 @@ export default class Request extends Component {
             for (let i = 0; i < pay.length; i++) pay[i].hidden = true;
             this.setState({
                 method: event.target.value,
-                payload: pay
+                payload: pay,
+                contentType: "Content-Type"
             })
         }
         else {
@@ -186,6 +190,17 @@ export default class Request extends Component {
         })
     }
 
+    getPostPutParams(data, type) {
+        if (type === "application/x-www-form-urlencoded") {
+            const params = new URLSearchParams();
+            Object.keys(data).forEach(key => {
+                params.append(key, data[key])
+            })
+            return params;
+        }
+        return data;
+    }
+
     handelGet() {
         axios.get(this.state.address)
             .then(res => {
@@ -195,8 +210,18 @@ export default class Request extends Component {
     }
 
     handelPost(data) {
-        console.log(data);
-        axios.post(this.state.address, data)
+        if (this.state.contentType === "Content-Type") {
+            conentType();
+            return;
+        }
+        let headers = {
+            'Content-Type': this.state.contentType
+        }
+        if (this.state.contentType === "none") {
+            headers = {};
+        }
+        data = this.getPostPutParams(data, this.state.contentType)
+        axios.post(this.state.address, data, { headers: headers })
             .then(res => {
                 this.props.sendResponse(res.data)
             })
@@ -204,50 +229,75 @@ export default class Request extends Component {
     }
 
     handelDelete(data) {
-
-        axios.delete(this.state.address, {data:data})
-                .then(res => {
-                    this.props.sendResponse(res.data)
-                })
-                .catch(err => errorToast())
-        }
-
-        handelUpdate(data)
-        {
-            axios.put(this.state.address, data)
-                .then(res => {
-                    this.props.sendResponse(res.data)
-                })
-                .catch(err => errorToast())
-        }
-
-        render() {
-            let arr = [];
-            this.state.payload.forEach(value => arr.push(this.createRequestComp(value)))
-            return (
-                <div className="comp border">
-                    <h1>Resquests</h1>
-                    <form>
-                        <div className="row mb-3" style={{ margin: "0 auto", width: "90%" }}>
-                            <div className="col" style={{ width: "30%" }}>
-                                <select class="custom-select mb-3" onChange={this.updateMethod}>
-                                    <option selected value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="UPDATE">UPDATE</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
-                            </div>
-
-                            <div className="col-9">
-                                <input type="text" className="form-control" id="" aria-describedby="key" placeholder="https://google.com" onChange={this.updateAddress} value={this.state.address} />
-                            </div>
-                        </div>
-                        {arr}
-                        <button type="submit" className="btn btn-primary mr-2" onClick={this.handelSubmit}>Submit</button>
-                        <button className="btn btn-primary mr-2" onClick={this.addNewParam}>Add</button>
-                    </form>
-                    <ToastContainer />
-                </div>
-            )
-        }
+        axios.delete(this.state.address, { data: data })
+            .then(res => {
+                this.props.sendResponse(res.data)
+            })
+            .catch(err => errorToast())
     }
+
+    handelUpdate(data) {
+        if (this.state.contentType === "Content-Type") {
+            conentType();
+            return;
+        }
+        let headers = {
+            'Content-Type': this.state.contentType
+        }
+        if (this.state.contentType === "none") {
+            headers = {};
+        }
+        data = this.getPostPutParams(data, this.state.contentType)
+        axios.put(this.state.address, data, { headers: headers })
+            .then(res => {
+                this.props.sendResponse(res.data)
+            })
+            .catch(err => errorToast())
+    }
+
+    updateContentType(event) {
+        this.setState({
+            contentType: event.target.value
+        })
+    }
+
+    render() {
+        let arr = [];
+        this.state.payload.forEach(value => arr.push(this.createRequestComp(value)))
+        return (
+            <div className="comp border">
+                <h1>Resquests</h1>
+                <form>
+                    <div className="row mb-3" style={{ margin: "0 auto", width: "90%" }}>
+                        <div className="col" style={{ width: "30%" }}>
+                            <select class="custom-select mb-3" onChange={this.updateMethod}>
+                                <option selected value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="UPDATE">UPDATE</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+
+                        <div className="col-9">
+                            <input type="text" className="form-control" id="" aria-describedby="key" placeholder="https://google.com" onChange={this.updateAddress} value={this.state.address} />
+                        </div>
+                    </div>
+
+                    <div className="ml-4 mr-4 mb-2" style={{ display: this.state.method != "POST" && this.state.method != "UPDATE" ? "none" : "block" }}>
+                        <select class="custom-select" onChange={this.updateContentType}>
+                            <option selected value="Content-Type">Content-Type</option>
+                            <option value="application/json">application/json</option>
+                            <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                            <option value="none">No Content-Type Header</option>
+                        </select>
+                    </div>
+
+                    {arr}
+                    <button type="submit" className="btn btn-primary mr-2" onClick={this.handelSubmit}>Submit</button>
+                    <button className="btn btn-primary mr-2" onClick={this.addNewParam}>Add</button>
+                </form>
+                <ToastContainer />
+            </div>
+        )
+    }
+}
