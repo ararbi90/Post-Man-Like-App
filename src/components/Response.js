@@ -4,11 +4,6 @@ import "../index.css";
 
 export default class Response extends Component
 {
-    constructor(props)
-    {
-        super(props);
-    }
-
     render()
     {
         let arr = [];
@@ -16,7 +11,7 @@ export default class Response extends Component
             arr.push(<ResponseComp instance={{[d]: this.props.data[d]}}/>)
         });
         return (<div className="comp border"> 
-        <h3>Responses</h3>
+        <h3 className="mt-2">Responses</h3>
         {arr}
         </div>);
     }

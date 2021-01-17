@@ -266,7 +266,7 @@ export default class Request extends Component {
         this.state.payload.forEach(value => arr.push(this.createRequestComp(value)))
         return (
             <div className="comp border">
-                <h1>Resquests</h1>
+                <h1 className="mt-2">Resquests</h1>
                 <form>
                     <div className="row mb-3" style={{ margin: "0 auto", width: "90%" }}>
                         <div className="col" style={{ width: "30%" }}>
@@ -283,7 +283,7 @@ export default class Request extends Component {
                         </div>
                     </div>
 
-                    <div className="ml-4 mr-4 mb-2" style={{ display: this.state.method != "POST" && this.state.method != "UPDATE" ? "none" : "block" }}>
+                    <div className="mb-2" style={{ display: this.state.method !== "POST" && this.state.method !== "UPDATE" ? "none" : "block", width:"87%", margin:"0 auto"}}>
                         <select class="custom-select" onChange={this.updateContentType}>
                             <option selected value="Content-Type">Content-Type</option>
                             <option value="application/json">application/json</option>
