@@ -12,7 +12,9 @@ export default class Response extends Component
     render()
     {
         let arr = [];
-        Object.keys(this.props.data).forEach(d => arr.push(<ResponseComp instance={{d: this.props.data[d]}}/>));
+        Object.keys(this.props.data).forEach(d => {
+            arr.push(<ResponseComp instance={{[d]: this.props.data[d]}}/>)
+        });
         return (<div className="comp border"> 
         <h3>Responses</h3>
         {arr}
