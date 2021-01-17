@@ -176,7 +176,10 @@ export default class Request extends Component {
             })
         }
     }
-
+    /**
+     * Added a comment:wq
+     * @param {*} event 
+     */
     updateAddress(event) {
         this.setState({
             address: event.target.value
